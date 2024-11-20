@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vellore AQI Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .prediction-card {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            background-color: white;
+        }
+        .result-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="prediction-card">
+            <h2 class="text-center mb-4">Vellore AQI Predictor</h2>
+            <form id="prediction-form">
+                <div class="mb-3">
+                    <label for="temperature" class="form-label">Temperature (°C)</label>
+                    <input type="number" class="form-control" id="temperature" name="temperature" required step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label for="humidity" class="form-label">Humidity (%)</label>
+                    <input type="number" class="form-control" id="humidity" name="humidity" required step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label for="pm25" class="form-label">PM2.5 (μg/m³)</label>
+                    <input type="number" class="form-control" id="pm25" name="pm25" required step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label for="pm10" class="form-label">PM10 (μg/m³)</label>
+                    <input type="number" class="form-control" id="pm10" name="pm10" required step="0.01">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Predict AQI</button>
+            </form>
+            
+            <div id="result" class="result-section alert alert-success">
+                <h4 class="text-center">Predicted AQI: <span id="aqi-value">--</span></h4>
+                <p class="text-center mb-0">Prediction Time: <span id="prediction-time">--</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#prediction-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if(response.success) {
+                            $('#aqi-value').text(response.prediction);
+                            $('#prediction-time').text(response.timestamp);
+                            $('#result').slideDown();
+                        } else {
+                            alert('Error: ' + response.error);
+                        }
+                    },
+                    error: function() {
+                        alert('Error making prediction. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
